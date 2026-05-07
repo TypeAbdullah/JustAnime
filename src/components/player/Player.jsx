@@ -1,3 +1,5 @@
+/* eslint-disable no-empty */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import Hls from "hls.js";
 import { useEffect, useRef, useState } from "react";
@@ -28,20 +30,22 @@ import website_name from "@/src/config/website";
 import getChapterStyles from "./getChapterStyle";
 import artplayerPluginHlsControl from "artplayer-plugin-hls-control";
 import artplayerPluginUploadSubtitle from "./artplayerPluginUploadSubtitle";
+import { getTitle } from "@/src/utils/title.utils";
 
 Artplayer.LOG_VERSION = false;
 Artplayer.CONTEXTMENU = false;
 
 const KEY_CODES = {
-  M: "m",
-  I: "i",
-  F: "f",
-  V: "v",
-  SPACE: " ",
-  ARROW_UP: "arrowup",
-  ARROW_DOWN: "arrowdown",
-  ARROW_RIGHT: "arrowright",
-  ARROW_LEFT: "arrowleft",
+  M: "KeyM",
+  I: "KeyI",
+  F: "KeyF",
+  V: "KeyV",
+  SPACE: "Space",
+  SPACE_LEGACY: "Spacebar",
+  ARROW_UP: "ArrowUp",
+  ARROW_DOWN: "ArrowDown",
+  ARROW_RIGHT: "ArrowRight",
+  ARROW_LEFT: "ArrowLeft",
 };
 
 export default function Player({
@@ -59,15 +63,15 @@ export default function Player({
   animeInfo,
   episodeNum,
   streamInfo,
+  activeServerName,
 }) {
   const artRef = useRef(null);
-  const leftAtRef = useRef(0); 
-  const proxy = import.meta.env.VITE_PROXY_URL;
+  const leftAtRef = useRef(0);
+  const boundKeydownRef = useRef(null);
+  const proxy = import.meta.env.VITE_M3U8_PROXY_URL;
   const m3u8proxy = import.meta.env.VITE_M3U8_PROXY_URL?.split(",") || [];
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(
-    episodes?.findIndex(
-      (episode) => episode.id.match(/ep=(\d+)/)?.[1] === episodeId
-    )
+    episodes?.findIndex((episode) => episode.id.match(/ep=(\d+)/)?.[1] === episodeId)
   );
 
   useEffect(() => {
@@ -78,11 +82,10 @@ export default function Player({
       setCurrentEpisodeIndex(newIndex);
     }
   }, [episodeId, episodes]);
+
   useEffect(() => {
     const applyChapterStyles = () => {
-      const existingStyles = document.querySelectorAll(
-        "style[data-chapter-styles]"
-      );
+      const existingStyles = document.querySelectorAll("style[data-chapter-styles]");
       existingStyles.forEach((style) => style.remove());
       const styleElement = document.createElement("style");
       styleElement.setAttribute("data-chapter-styles", "true");
@@ -110,18 +113,13 @@ export default function Player({
 
       art.on("destroy", () => hls.destroy());
 
-      // hls.on(Hls.Events.ERROR, (event, data) => {
-      //   console.error("HLS.js error:", data);
-      // });
       video.addEventListener("timeupdate", () => {
         const currentTime = Math.round(video.currentTime);
         const duration = Math.round(video.duration);
         if (duration > 0 && currentTime >= duration) {
-            art.pause();
-            if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
-              playNext(
-                episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]
-              );
+          art.pause();
+          if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
+            playNext(episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]);
           }
         }
       });
@@ -131,11 +129,9 @@ export default function Player({
         const currentTime = Math.round(video.currentTime);
         const duration = Math.round(video.duration);
         if (duration > 0 && currentTime >= duration) {
-            art.pause();
-            if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
-              playNext(
-                episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]
-              );
+          art.pause();
+          if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
+            playNext(episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]);
           }
         }
       });
@@ -155,29 +151,76 @@ export default function Player({
     return chapters;
   };
 
+  const isEditableElement = (el) => {
+    if (!el) return false;
+    const tagName = el.tagName?.toLowerCase();
+    if (tagName === "input" || tagName === "textarea" || el.isContentEditable) return true;
+    if (el.closest) {
+      const editable = el.closest("input, textarea, [contenteditable='true']");
+      return !!editable;
+    }
+    return false;
+  };
+
   const handleKeydown = (event, art) => {
-    const tagName = event.target.tagName.toLowerCase();
+    const container = artRef.current;
+    if (!container || !art) return;
 
-    if (tagName === "input" || tagName === "textarea") return;
+    const target = event.target;
+    if (isEditableElement(target)) return;
 
-    switch (event.key.toLowerCase()) {
+    const eventIsInsidePlayer =
+      container.contains(target) || container.contains(document.activeElement);
+
+    if (!eventIsInsidePlayer) return;
+
+    const code = event.code;
+
+    switch (code) {
       case KEY_CODES.M:
         art.muted = !art.muted;
         break;
       case KEY_CODES.I:
         art.pip = !art.pip;
         break;
-      case KEY_CODES.F:
+      case KEY_CODES.F: {
         event.preventDefault();
         event.stopPropagation();
-        art.fullscreen = !art.fullscreen;
+
+        const container = artRef.current;
+        const doc = document;
+        const fsEl =
+          doc.fullscreenElement ||
+          doc.webkitFullscreenElement ||
+          doc.mozFullScreenElement ||
+          doc.msFullscreenElement;
+
+        if (fsEl && (fsEl === container || container.contains(fsEl))) {
+          if (doc.exitFullscreen) doc.exitFullscreen();
+          else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+          else if (doc.mozCancelFullScreen) doc.mozCancelFullScreen();
+          else if (doc.msExitFullscreen) doc.msExitFullscreen();
+        } else {
+          if (container.requestFullscreen) container.requestFullscreen();
+          else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+          else if (container.mozRequestFullScreen) container.mozRequestFullScreen();
+          else if (container.msRequestFullscreen) container.msRequestFullscreen();
+        }
+
+        try {
+          art.fullscreen = !art.fullscreen;
+        } catch (e) {
+          // ignore if art not available
+        }
         break;
+      }
       case KEY_CODES.V:
         event.preventDefault();
         event.stopPropagation();
         art.subtitle.show = !art.subtitle.show;
         break;
       case KEY_CODES.SPACE:
+      case KEY_CODES.SPACE_LEGACY:
         event.preventDefault();
         event.stopPropagation();
         art.playing ? art.pause() : art.play();
@@ -209,20 +252,37 @@ export default function Player({
 
   useEffect(() => {
     if (!streamUrl || !artRef.current) return;
-    const iframeUrl = streamInfo?.streamingLink?.iframe;
-    const headers = {};
-    headers.referer=new URL(iframeUrl).origin+"/";
-    console.log(m3u8proxy[Math.floor(Math.random() * m3u8proxy?.length)] +
-        encodeURIComponent(streamUrl) +
-         "&headers=" +
-         encodeURIComponent(JSON.stringify(headers)));
+
+    const iframeUrl = streamInfo?.streamingLink?.[0]?.iframe;
+    const headers = {
+      referer: iframeUrl ? new URL(iframeUrl).origin + "/" : window.location.origin + "/",
+    };
+
+    const container = artRef.current;
+    let fullscreenRefocusTimeout = null;
+
+    try {
+      if (!container.hasAttribute("tabindex")) container.setAttribute("tabindex", "0");
+      else {
+        const current = parseInt(container.getAttribute("tabindex"), 10);
+        if (isNaN(current) || current < 0) container.setAttribute("tabindex", "0");
+      }
+      container.style.outline = "none";
+    } catch (e) {
+      // ignore
+    }
+
+    const hd1Proxy = import.meta.env.VITE_HD_1_PROXY_URL;
+    const currentProxy = (activeServerName === "HD-1" && hd1Proxy)
+      ? hd1Proxy
+      : m3u8proxy[Math.floor(Math.random() * m3u8proxy?.length)];
 
     const art = new Artplayer({
       url:
-        m3u8proxy[Math.floor(Math.random() * m3u8proxy?.length)] +
+        currentProxy +
         encodeURIComponent(streamUrl) +
-         "&headers=" +
-         encodeURIComponent(JSON.stringify(headers)),
+        "&headers=" +
+        encodeURIComponent(JSON.stringify(headers)),
       container: artRef.current,
       type: "m3u8",
       autoplay: autoPlay,
@@ -240,8 +300,8 @@ export default function Player({
       fastForward: true,
       aspectRatio: true,
       moreVideoAttr: {
-        crossOrigin: 'anonymous',
-        preload: 'none',
+        crossOrigin: "anonymous",
+        preload: "none",
         playsInline: true,
       },
       plugins: [
@@ -369,13 +429,55 @@ export default function Player({
       },
       customType: { m3u8: playM3u8 },
     });
+
     art.on("resize", () => {
       art.subtitle.style({
-        fontSize:
-          (art.width > 500 ? art.width * 0.02 : art.width * 0.03) + "px",
+        fontSize: (art.width > 500 ? art.width * 0.02 : art.width * 0.03) + "px",
       });
     });
+
+    const refocusIfNeeded = (delay = 30) => {
+      try {
+        if (!container) return;
+        const active = document.activeElement;
+        if (!container.contains(active)) {
+          fullscreenRefocusTimeout = setTimeout(() => {
+            try {
+              container.focus();
+            } catch (e) {
+              // ignore
+            }
+          }, delay);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+        refocusIfNeeded(40);
+      } else {
+        refocusIfNeeded(20);
+      }
+    };
+
+    // vendor event wrappers
+    const fullscreenEvents = [
+      "fullscreenchange",
+      "webkitfullscreenchange",
+      "mozfullscreenchange",
+      "MSFullscreenChange",
+    ];
+    fullscreenEvents.forEach((ev) => document.addEventListener(ev, onFullscreenChange));
+
     art.on("ready", () => {
+      try {
+        container.focus();
+      } catch (e) {
+        // ignore
+      }
+
       const continueWatchingList = JSON.parse(localStorage.getItem("continueWatching")) || [];
       const currentEntry = continueWatchingList.find((item) => item.episodeId === episodeId);
       if (currentEntry?.leftAt) art.currentTime = currentEntry.leftAt;
@@ -388,7 +490,10 @@ export default function Player({
         art.layers[website_name].style.opacity = 0;
       }, 2000);
 
-      const defaultSubtitle = subtitles?.find((sub) => sub.label.toLowerCase() === "english");
+      const subs = (subtitles || []).map((s) => ({ ...s }));
+      // VTT subtitle files from HiAnime CDNs are public, no proxy needed
+
+      const defaultSubtitle = subs?.find((sub) => sub.label.toLowerCase() === "english");
       if (defaultSubtitle) {
         art.subtitle.switch(defaultSubtitle.file, {
           name: defaultSubtitle.label,
@@ -397,12 +502,38 @@ export default function Player({
       }
 
       const skipRanges = [
-        ...(intro.start != null && intro.end != null ? [[intro.start + 1, intro.end - 1]] : []),
-        ...(outro.start != null && outro.end != null ? [[outro.start + 1, outro.end]] : []),
+        ...(intro?.start != null && intro?.end != null ? [[intro.start + 1, intro.end - 1]] : []),
+        ...(outro?.start != null && outro?.end != null ? [[outro.start + 1, outro.end]] : []),
       ];
       autoSkipIntro && art.plugins.add(autoSkip(skipRanges));
 
-      document.addEventListener("keydown", (event) => handleKeydown(event, art));
+      const boundKeydown = (event) => handleKeydown(event, art);
+      boundKeydownRef.current = boundKeydown;
+      document.addEventListener("keydown", boundKeydown);
+
+      const focusOnPointerDown = () => {
+        try {
+          container.focus();
+        } catch (err) {
+          // ignore
+        }
+      };
+      container.addEventListener("pointerdown", focusOnPointerDown, { passive: true });
+
+      const onWindowFocus = () => refocusIfNeeded(30);
+      window.addEventListener("focus", onWindowFocus);
+
+      art.on("destroy", () => {
+        try {
+          document.removeEventListener("keydown", boundKeydown);
+        } catch (e) { }
+        try {
+          container.removeEventListener("pointerdown", focusOnPointerDown);
+        } catch (e) { }
+        try {
+          window.removeEventListener("focus", onWindowFocus);
+        } catch (e) { }
+      });
 
       art.subtitle.style({
         fontSize: (art.width > 500 ? art.width * 0.02 : art.width * 0.03) + "px",
@@ -411,10 +542,11 @@ export default function Player({
       if (thumbnail) {
         art.plugins.add(
           artplayerPluginVttThumbnail({
-            vtt: `${proxy}${thumbnail}`,
+            vtt: thumbnail,
           })
         );
       }
+
       const $rewind = art.layers["rewind"];
       const $forward = art.layers["forward"];
       Artplayer.utils.isMobile &&
@@ -433,10 +565,11 @@ export default function Player({
             art.layers["forwardIcon"].style.opacity = 0;
           }, 300);
         });
-      if (subtitles?.length > 0) {
+
+      if (subs?.length > 0) {
         const defaultEnglishSub =
-          subtitles.find((sub) => sub.label.toLowerCase() === "english" && sub.default) ||
-          subtitles.find((sub) => sub.label.toLowerCase() === "english");
+          subs.find((sub) => sub.label.toLowerCase() === "english" && sub.default) ||
+          subs.find((sub) => sub.label.toLowerCase() === "english");
 
         art.setting.add({
           name: "captions",
@@ -454,10 +587,10 @@ export default function Player({
                 return !item.switch;
               },
             },
-            ...subtitles.map((sub) => ({
+            ...subs.map((sub) => ({
               default: sub.label.toLowerCase() === "english" && sub === defaultEnglishSub,
               html: sub.label,
-              url: sub.file,
+              url: sub.file, // direct CDN URL, no proxy needed
             })),
           ],
           onSelect: (item) => {
@@ -472,32 +605,42 @@ export default function Player({
       if (art && art.destroy) {
         art.destroy(false);
       }
-      document.removeEventListener("keydown", handleKeydown);
-      const continueWatching = JSON.parse(localStorage.getItem("continueWatching")) || [];
-      const newEntry = {
-        id: animeInfo?.id,
-        data_id: animeInfo?.data_id,
-        episodeId,
-        episodeNum,
-        adultContent: animeInfo?.adultContent,
-        poster: animeInfo?.poster,
-        title: animeInfo?.title,
-        japanese_title: animeInfo?.japanese_title,
-        leftAt: leftAtRef.current,
-      };
 
-      if (!newEntry.data_id) return;
-
-      const existingIndex = continueWatching.findIndex((item) => item.data_id === newEntry.data_id);
-      if (existingIndex !== -1) {
-        continueWatching[existingIndex] = newEntry;
-      } else {
-        continueWatching.push(newEntry);
+      fullscreenEvents.forEach((ev) => document.removeEventListener(ev, onFullscreenChange));
+      if (boundKeydownRef.current) {
+        try {
+          document.removeEventListener("keydown", boundKeydownRef.current);
+        } catch (e) { }
+        boundKeydownRef.current = null;
       }
-      localStorage.setItem("continueWatching", JSON.stringify(continueWatching));
+      if (fullscreenRefocusTimeout) clearTimeout(fullscreenRefocusTimeout);
+
+      try {
+        const continueWatching = JSON.parse(localStorage.getItem("continueWatching")) || [];
+        const newEntry = {
+          id: animeInfo?.id,
+          data_id: animeInfo?.data_id,
+          episodeId,
+          episodeNum,
+          adultContent: animeInfo?.adultContent,
+          poster: animeInfo?.poster,
+          title: getTitle(animeInfo, "EN"),
+          japanese_title: getTitle(animeInfo, "JP"),
+          leftAt: leftAtRef.current,
+          updatedAt: Date.now(),
+        };
+
+        if (!newEntry.data_id) return;
+
+        const filtered = continueWatching.filter((item) => item.data_id !== newEntry.data_id);
+        filtered.unshift(newEntry);
+        localStorage.setItem("continueWatching", JSON.stringify(filtered));
+      } catch (err) {
+        console.error("Failed to save continueWatching:", err);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [streamUrl, subtitles, intro, outro]);
+  }, [streamUrl, subtitles, intro, outro, activeServerName]);
 
-  return <div ref={artRef} className="w-full h-full"></div>;
+  return <div ref={artRef} className="w-full h-full" />;
 }

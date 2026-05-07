@@ -1,18 +1,39 @@
 import logoTitle from "@/src/config/logoTitle.js";
 import website_name from "@/src/config/website.js";
 import { Link } from "react-router-dom";
+import { FaDiscord, FaTelegram } from "react-icons/fa";
 
 function Footer() {
   return (
-    <footer className="w-full mt-16">
+    <footer className="w-full mt-auto">
       {/* Logo Section */}
       <div className="max-w-[1920px] mx-auto px-4">
-        <div className="flex justify-center sm:justify-start items-center gap-6">
-          <img
-            src="/footer.png"
-            alt={logoTitle}
-            className="h-[100px] w-[200px] object-contain"
-          />
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-6">
+            <img
+              src="/footer.png"
+              alt={logoTitle}
+              className="h-[100px] w-[200px] object-contain"
+            />
+            <div className="flex items-center gap-4 border-l border-white/10 pl-6 h-10">
+              <a
+                href="https://discord.gg/P3yqksmGun"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 hover:text-[#5865F2] transition-all hover:scale-110"
+              >
+                <FaDiscord size={28} />
+              </a>
+              <a
+                href="https://t.me/JustAnimeZone"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 hover:text-[#26A5E4] transition-all hover:scale-110"
+              >
+                <FaTelegram size={28} />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -65,7 +86,7 @@ function Footer() {
               hosts and providers. {website_name} is not responsible for any media
               files shown by the video providers.
             </p>
-            <p>© {website_name}. All rights reserved.</p>
+            <p>© 2026 <a href="https://justanime.site" className="hover:text-white/60 underline transition-colors">{website_name}</a>. All rights reserved.</p>
           </div>
         </div>
       </div>

@@ -14,10 +14,10 @@ function DMCA() {
 
         <div>
           <p className="leading-relaxed text-base">
-            We take the intellectual property rights of others seriously and require that our Users do the same. 
-            The Digital Millennium Copyright Act (DMCA) established a process for addressing claims of copyright infringement. 
-            If you own a copyright or have authority to act on behalf of a copyright owner and want to report a claim that a 
-            third party is infringing that material on or through {website_name}'s services, please submit a DMCA report on 
+            We take the intellectual property rights of others seriously and require that our Users do the same.
+            The Digital Millennium Copyright Act (DMCA) established a process for addressing claims of copyright infringement.
+            If you own a copyright or have authority to act on behalf of a copyright owner and want to report a claim that a
+            third party is infringing that material on or through {website_name}'s services, please submit a DMCA report on
             our Contact page, and we will take appropriate action.
           </p>
         </div>
@@ -47,11 +47,11 @@ function DMCA() {
           <h2 className="text-xl font-semibold text-white mb-4">Submit Your Request</h2>
           <p className="leading-relaxed text-base">
             Your DMCA takedown request should be submit here:{' '}
-            <a 
-              href="/contact" 
+            <a
+              href="/contact"
               className="text-white hover:text-white/80 underline underline-offset-4 decoration-white/20 hover:decoration-white/40 transition-colors"
             >
-              https://justanime.to/contact
+              https://justanime.fun/contact
             </a>
           </p>
           <p className="mt-3 leading-relaxed text-base">

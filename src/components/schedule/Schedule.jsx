@@ -24,39 +24,28 @@ const Schedule = () => {
   const month = currentDate.getMonth();
   const monthName = currentDate.toLocaleString("default", { month: "short" });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const GMTOffset = `GMT ${
-    new Date().getTimezoneOffset() > 0 ? "-" : "+"
-  }${String(Math.floor(Math.abs(new Date().getTimezoneOffset()) / 60)).padStart(
-    2,
-    "0"
-  )}:${String(Math.abs(new Date().getTimezoneOffset()) % 60).padStart(2, "0")}`;
-  const months = [];
+  const GMTOffset = `GMT ${new Date().getTimezoneOffset() <= 0 ? "+" : "-"}${String(Math.floor(Math.abs(new Date().getTimezoneOffset()) / 60)).padStart(2, "0")}:${String(Math.abs(new Date().getTimezoneOffset()) % 60).padStart(2, "0")}`;
 
   useEffect(() => {
+    const monthsArr = [];
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dayname = date.toLocaleString("default", { weekday: "short" });
-      const yearr = date.getFullYear();
-      const monthh = String(date.getMonth() + 1).padStart(2, "0");
-      const dayy = String(date.getDate()).padStart(2, "0");
-      const fulldate = `${yearr}-${monthh}-${dayy}`;
-      months.push({ day, monthName, dayname, fulldate });
+      monthsArr.push({
+        day,
+        monthName: date.toLocaleString("default", { month: "short" }),
+        dayname: date.toLocaleString("default", { weekday: "short" }),
+        fulldate: date.toISOString().split('T')[0]
+      });
     }
-    setDates(months);
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    setDates(monthsArr);
+
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [year, month, daysInMonth]);
 
   useEffect(() => {
-    const todayIndex = dates.findIndex(
-      (date) =>
-        date.fulldate ===
-        `${currentDate.getFullYear()}-${String(
-          currentDate.getMonth() + 1
-        ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`
-    );
+    const today = new Date().toISOString().split('T')[0];
+    const todayIndex = dates.findIndex((date) => date.fulldate === today);
 
     if (todayIndex !== -1) {
       setCurrentActiveIndex(todayIndex);
@@ -150,21 +139,19 @@ const Schedule = () => {
                   <div
                     ref={(el) => (cardRefs.current[index] = el)}
                     onClick={() => toggleActive(index)}
-                    className={`h-[60px] flex flex-col justify-center items-center w-full text-center rounded-lg cursor-pointer transition-all duration-200 ${
-                      currentActiveIndex === index
-                        ? "bg-white text-black"
-                        : "bg-zinc-800 text-white hover:bg-zinc-700"
-                    }`}
+                    className={`h-[60px] flex flex-col justify-center items-center w-full text-center rounded-lg cursor-pointer transition-all duration-200 ${currentActiveIndex === index
+                      ? "bg-white text-black"
+                      : "bg-zinc-800 text-white hover:bg-zinc-700"
+                      }`}
                   >
                     <div className="text-[16px] font-bold max-[400px]:text-[14px] max-[350px]:text-[12px]">
                       {date.dayname}
                     </div>
                     <div
-                      className={`text-[13px] max-[400px]:text-[11px] ${
-                        currentActiveIndex === index
-                          ? "text-zinc-800"
-                          : "text-zinc-400"
-                      } max-[350px]:text-[10px]`}
+                      className={`text-[13px] max-[400px]:text-[11px] ${currentActiveIndex === index
+                        ? "text-zinc-800"
+                        : "text-zinc-400"
+                        } max-[350px]:text-[10px]`}
                     >
                       {date.monthName} {date.day}
                     </div>
@@ -197,8 +184,8 @@ const Schedule = () => {
           {(showAll
             ? scheduleData
             : Array.isArray(scheduleData)
-            ? scheduleData.slice(0, 7)
-            : []
+              ? scheduleData.slice(0, 7)
+              : []
           ).map((item, idx) => (
             <Link
               to={`/${item.id}`}

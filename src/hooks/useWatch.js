@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
 import getAnimeInfo from "@/src/utils/getAnimeInfo.utils";
@@ -113,57 +114,84 @@ export const useWatch = (animeId, initialEpisodeId) => {
   useEffect(() => {
     if (!episodeId || !episodes || isServerFetchInProgress.current) return;
 
+    let mounted = true;
+    const controller = new AbortController();
+    isServerFetchInProgress.current = true;
+    setServerLoading(true);
+
     const fetchServers = async () => {
-      isServerFetchInProgress.current = true;
-      setServerLoading(true);
       try {
-        const data = await getServers(animeId, episodeId);
-        console.log(data);
-        
-        const filteredServers = data?.filter(
-          (server) =>
-            server.serverName === "HD-1" ||
-            server.serverName === "HD-2" ||
-            server.serverName === "HD-3"
-        );
-        if (filteredServers.some((s) => s.type === "sub")) {
-          filteredServers.push({
-            type: "sub",
-            data_id: "69696969",
-            server_id: "41",
-            serverName: "HD-4",
-          });
-        }
-        if (filteredServers.some((s) => s.type === "dub")) {
-          filteredServers.push({
-            type: "dub",
-            data_id: "96969696",
-            server_id: "42",
-            serverName: "HD-4",
-          });
-        }
+        const data = await getServers(animeId, episodeId, { signal: controller.signal });
+        if (!mounted) return;
+
+        const allowedServers = [
+  "HD-1",
+  "HD-2",
+  "Vidstreaming",
+  "Vidcloud",
+  "DouVideo",
+  "VidSrc",
+  "MegaCloud",
+];
+
+const filteredServers = data?.filter(server =>
+  allowedServers.includes(server.serverName)
+) || [];
+
+        let serversList = [...filteredServers];
+
+
+
         const savedServerName = localStorage.getItem("server_name");
         const savedServerType = localStorage.getItem("server_type");
-        const initialServer =
-          filteredServers.find(s => s.serverName === savedServerName && s.type === savedServerType) ||
-          filteredServers.find(s => s.serverName === savedServerName) ||
-          filteredServers.find(s => s.type === savedServerType && ["HD-1", "HD-2", "HD-3", "HD-4"].includes(s.serverName)) ||
-          filteredServers[0];
 
-        setServers(filteredServers);
+        const initialServer =
+          serversList.find(s => s.serverName === savedServerName && s.type === savedServerType) ||
+          serversList.find(s => s.serverName === savedServerName) ||
+          serversList.find(s => s.serverName === "HD-2") ||
+          serversList.find(
+            s =>
+              s.type === savedServerType &&
+              ["HD-1", "HD-2", "HD-3", "HD-4", "Vidstreaming", "Vidcloud", "DouVideo"].includes(s.serverName)
+          ) ||
+          serversList[0];
+
+        setServers(serversList);
         setActiveServerType(initialServer?.type);
         setActiveServerName(initialServer?.serverName);
         setActiveServerId(initialServer?.data_id);
-      } catch (error) {
-        console.error("Error fetching servers:", error);
-        setError(error.message || "An error occurred.");
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+        console.error("Error fetching servers:", err);
+        if (mounted) setError(err.message || "An error occurred.");
       } finally {
-        setServerLoading(false);
-        isServerFetchInProgress.current = false;
+        if (mounted) {
+          setServerLoading(false);
+          isServerFetchInProgress.current = false;
+        }
       }
     };
+
     fetchServers();
+
+    return () => {
+      mounted = false;
+      try { controller.abort(); } catch (e) {
+        // console.log(e.message);
+      }
+      isServerFetchInProgress.current = false;
+    };
   }, [episodeId, episodes]);
+
+  useEffect(() => {
+    if (!servers || !activeServerId) return;
+    const activeServer = servers.find((s) => s.data_id === activeServerId);
+    if (activeServer) {
+      setActiveServerName(activeServer.serverName);
+      setActiveServerType(activeServer.type);
+    }
+  }, [activeServerId, servers]);
+
   // Fetch stream info only when episodeId, activeServerId, and servers are ready
   useEffect(() => {
     if (
@@ -174,11 +202,10 @@ export const useWatch = (animeId, initialEpisodeId) => {
       isStreamFetchInProgress.current
     )
       return;
-    if (
-      (activeServerName?.toLowerCase() === "hd-1" || activeServerName?.toLowerCase() === "hd-4") 
-        &&
-      !serverLoading
-    ) {
+    const iframeServers = [];
+    // const iframeServers = ["hd-1", "hd-4", "vidstreaming", "vidcloud", "douvideo"];
+
+    if (iframeServers.includes(activeServerName?.toLowerCase()) && !serverLoading) {
       setBuffering(false);
       return;
     }
@@ -191,19 +218,19 @@ export const useWatch = (animeId, initialEpisodeId) => {
           const data = await getStreamInfo(
             animeId,
             episodeId,
-            server.serverName.toLowerCase()==="hd-3"?"hd-1":server.serverName.toLowerCase(),
+            server.serverName.toLowerCase() === "hd-3" ? "hd-1" : server.serverName.toLowerCase(),
             server.type.toLowerCase()
           );
           setStreamInfo(data);
-          setStreamUrl(data?.streamingLink?.link?.file || null);
-          setIntro(data?.streamingLink?.intro || null);
-          setOutro(data?.streamingLink?.outro || null);
+          setStreamUrl(data?.streamingLink?.[0]?.link || null);
+          setIntro(data?.intro || null);
+          setOutro(data?.outro || null);
           const subtitles =
-            data?.streamingLink?.tracks
+            data?.tracks
               ?.filter((track) => track.kind === "captions")
-              .map(({ file, label }) => ({ file, label })) || [];
+              .map(({ file, label, default: isDefault }) => ({ file, label, default: isDefault })) || [];
           setSubtitles(subtitles);
-          const thumbnailTrack = data?.streamingLink?.tracks?.find(
+          const thumbnailTrack = data?.tracks?.find(
             (track) => track.kind === "thumbnails" && track.file
           );
           if (thumbnailTrack) setThumbnail(thumbnailTrack.file);

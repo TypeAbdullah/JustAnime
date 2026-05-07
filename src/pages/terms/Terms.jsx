@@ -13,7 +13,7 @@ function Terms() {
         <div>
           <h2 className="text-xl font-semibold text-white mb-4">1. Terms</h2>
           <p className="leading-relaxed text-base">
-            By accessing this Website, accessible from https://justanime.to, you are agreeing to be bound by these Website Terms and Conditions of Use and agree that you are responsible for the agreement with any applicable local laws. If you disagree with any of these terms, you are prohibited from accessing this site. The materials contained in this Website are protected by copyright and trade mark law.
+            By accessing this Website, accessible from https://justanime.fun, you are agreeing to be bound by these Website Terms and Conditions of Use and agree that you are responsible for the agreement with any applicable local laws. If you disagree with any of these terms, you are prohibited from accessing this site. The materials contained in this Website are protected by copyright and trade mark law.
           </p>
         </div>
 
