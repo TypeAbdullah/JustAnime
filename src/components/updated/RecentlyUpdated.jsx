@@ -100,7 +100,7 @@ const RecentlyUpdated = ({ data }) => {
   return (
     <div className="recently-updated-container mt-16 mb-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+        <h2 className="text-xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
             Recently Updated
         </h2>
         <Link to="/latest" className="updated-view-all">

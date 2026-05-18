@@ -152,7 +152,7 @@ const AnimeInfo = ({ random = false }) => {
         <div className="backdrop-overlay"></div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-10 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
         {/* Breadcrumb */}
         <div className="breadcrumb-nav">
           <Link to="/home" className="home-link"><FontAwesomeIcon icon={faHome} /></Link>

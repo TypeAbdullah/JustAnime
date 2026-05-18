@@ -89,7 +89,41 @@ function Navbar() {
             ? "bg-black/80 backdrop-blur-md shadow-lg border-b border-white/5" 
             : "bg-transparent"}`}
       >
-        <div className="max-w-[1920px] mx-auto px-2 sm:px-6 h-14 flex items-center justify-between">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
+          {/* Left Section: Hamburger & Logo */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            {/* Custom Hamburger */}
+            <button 
+              onClick={handleHamburgerClick}
+              className="flex flex-col gap-[4px] cursor-pointer group p-2 -ml-2"
+            >
+              <div className="w-5 h-[2px] bg-white/70 group-hover:bg-white transition-colors"></div>
+              <div className="w-5 h-[2px] bg-white/70 group-hover:bg-white transition-colors"></div>
+            </button>
+            
+            <Link to="/home" className="flex items-center">
+              <span className="text-xl font-black text-white tracking-tighter uppercase italic">
+                ANIMETSU
+              </span>
+            </Link>
+          </div>
+
+
+  useEffect(() => {
+    setIsNotHomePage(
+      location.pathname !== "/" && location.pathname !== "/home"
+    );
+  }, [location.pathname]);
+
+  return (
+    <SearchProvider>
+      <nav
+        className={`fixed top-0 left-0 w-full z-[1000000] transition-all duration-300 ease-in-out
+          ${(isScrolled || isNotHomePage) 
+            ? "bg-black/80 backdrop-blur-md shadow-lg border-b border-white/5" 
+            : "bg-transparent"}`}
+      >
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
           {/* Left Section: Hamburger & Logo */}
           <div className="flex items-center gap-4 sm:gap-6">
             {/* Custom Hamburger */}
@@ -114,7 +148,17 @@ function Navbar() {
               <WebSearch />
             </div>
 
-            <div className="flex items-center gap-4 text-white/60">
+            <div className="flex items-center gap-4 sm:gap-6 text-white/60">
+              {/* Mobile Search Icon */}
+              <button
+                onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                className="md:hidden hover:text-white transition-colors"
+              >
+                <FontAwesomeIcon 
+                  icon={isMobileSearchOpen ? faXmark : faMagnifyingGlass} 
+                  className="text-[17px]"
+                />
+              </button>
               <button className="hover:text-white transition-colors relative">
                 <FontAwesomeIcon icon={faBell} className="text-[17px]" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0a0a0a]"></span>
@@ -128,25 +172,10 @@ function Navbar() {
               </button>
             </div>
           </div>
-
-          {/* Mobile Search Icon */}
-          <div className="md:hidden flex items-center ml-4">
-            <button
-              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-              className="text-white/60 hover:text-white transition-colors"
-            >
-              <FontAwesomeIcon 
-                icon={isMobileSearchOpen ? faXmark : faMagnifyingGlass} 
-                className="text-[18px]"
-              />
-            </button>
-          </div>
         </div>
 
         {/* Mobile Search Dropdown */}
         {isMobileSearchOpen && (
-          <div className="md:hidden bg-[#18181B] shadow-lg">
-            <MobileSearch onClose={() => setIsMobileSearchOpen(false)} />
         </div>
         )}
 

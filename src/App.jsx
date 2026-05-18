@@ -37,7 +37,7 @@ function App() {
   return (
     <HelmetProvider>
       <HomeInfoProvider>
-        <div className={`app-container ${isSplashScreen || location.pathname === "/home" ? "" : "px-4 lg:px-10"} flex flex-col min-h-screen`}>
+        <div className={`app-container ${isSplashScreen || location.pathname === "/home" ? "" : "px-4 sm:px-6 lg:px-10"} flex flex-col min-h-screen`}>
           <main className="content max-w-[2048px] mx-auto w-full flex-grow flex flex-col">
             {!isSplashScreen && <Navbar />}
             <div className="flex-grow">

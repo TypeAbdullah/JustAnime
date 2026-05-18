@@ -74,7 +74,7 @@ const PopularSlider = ({ data }) => {
   return (
     <div className="trending-slider-container mt-12">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-white tracking-tight">Most Popular</h2>
+        <h2 className="text-xl md:text-3xl font-bold text-white tracking-tight">Most Popular</h2>
         <Link to="/most-popular" className="text-white/40 hover:text-white transition-colors flex items-center gap-2 text-sm font-semibold">
           View All <FontAwesomeIcon icon={faChevronRight} className="text-[10px]" />
         </Link>

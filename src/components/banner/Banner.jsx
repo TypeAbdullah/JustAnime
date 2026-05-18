@@ -75,7 +75,7 @@ function Banner({ item, index, isActive }) {
       {/* Cinematic Overlay */}
       <div className="spotlight-overlay absolute inset-0 z-[2]"></div>
 
-      <div className="absolute flex flex-col left-0 bottom-[15%] w-[65%] px-10 z-[3] max-md:w-[95%] max-md:px-5 max-md:bottom-[20px]">
+      <div className="absolute flex flex-col left-0 bottom-[15%] w-[65%] px-4 sm:px-6 lg:px-10 z-[3] max-md:w-full max-md:bottom-[20px]">
         {/* Title */}
         <h3 className="text-white banner-title line-clamp-2 text-5xl font-extrabold text-left tracking-tight max-[1390px]:text-[36px] max-md:text-2xl leading-[1.1]">
           {getSafeTitle(item.title, language, item.japanese_title)}

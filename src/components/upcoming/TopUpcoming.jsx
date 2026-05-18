@@ -187,7 +187,7 @@ const TopUpcoming = ({ data }) => {
   return (
     <div className="upcoming-slider-container mt-16 mb-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+        <h2 className="text-xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
             Top Upcoming
         </h2>
         <Link to="/upcoming" className="text-white/40 hover:text-white transition-colors flex items-center gap-2 text-sm font-semibold group">

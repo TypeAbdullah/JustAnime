@@ -265,7 +265,7 @@ export default function Watch() {
       )}
 
       <div className="w-full min-h-screen bg-black text-[#f1f1f1]">
-        <div className="w-full max-w-[1700px] mx-auto pt-20 pb-6 px-0 sm:px-4 lg:px-6 max-[1200px]:pt-16">
+        <div className="w-full max-w-[1700px] mx-auto pt-20 pb-6 px-4 sm:px-6 lg:px-10 max-[1200px]:pt-16">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
 
             {/* Left Column: Player & Info */}
@@ -576,10 +576,10 @@ export default function Watch() {
 
 
         {/* Sections */}
-        <div className="container mx-auto space-y-8 pb-12 lg:px-6">
+        <div className="container mx-auto space-y-8 pb-12 px-4 sm:px-6 lg:px-10">
           {seasons?.length > 0 && (
             <div>
-              <h2 className="text-2xl font-bold mb-6 px-1 text-white">More Seasons</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-6 px-1 text-white">More Seasons</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {seasons.map((season, index) => (
                   <Link

@@ -70,7 +70,7 @@ function Home() {
       <div className="pt-0 w-full overflow-hidden">
         <Spotlight spotlights={homeInfo.spotlights} />
         
-        <div className="px-4 lg:px-10 mt-6">
+        <div className="px-4 sm:px-6 lg:px-10 mt-6">
           <TrendingSlider data={homeInfo.trending} />
           <Genre data={homeInfo.genres} />
           
