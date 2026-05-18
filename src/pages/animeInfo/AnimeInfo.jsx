@@ -1,174 +1,112 @@
-import getAnimeInfo from "@/src/utils/getAnimeInfo.utils";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPlay,
-  faClosedCaptioning,
-  faMicrophone,
-} from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import CategoryCard from "@/src/components/categorycard/CategoryCard";
-import Loader from "@/src/components/Loader/Loader";
-import Error from "@/src/components/error/Error";
-import { useLanguage } from "@/src/context/LanguageContext";
-import Voiceactor from "@/src/components/voiceactor/Voiceactor";
-import getSafeTitle from "@/src/utils/getSafetitle";
 import { Helmet } from 'react-helmet-async';
-import InfoTag from "@/src/components/ui/InfoTag/InfoTag";
-import {
-  generateDescription,
-  generateKeywords,
-  generateCanonicalUrl,
-  generateOGImage,
-  generateAnimeStructuredData,
-  generateBreadcrumbStructuredData,
-  optimizeTitle,
-} from '@/src/utils/seo.utils';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faPlay, 
+  faBookmark, 
+  faShareAlt, 
+  faExternalLinkAlt, 
+  faEye, 
+  faChevronRight,
+  faHome,
+  faImage,
+  faSortAmountDown,
+  faBell,
+  faVideo
+} from "@fortawesome/free-solid-svg-icons";
 
-const InfoItem = ({ label, value, isProducer = true }) => {
+import getAnimeInfo from "@/src/utils/getAnimeInfo.utils";
+import getSafeTitle from "@/src/utils/getSafetitle";
+import { useLanguage } from "@/src/context/LanguageContext";
+import Loader from "@/src/components/Loader/Loader";
+import ErrorPage from "@/src/components/error/Error";
+import Voiceactor from "@/src/components/voiceactor/Voiceactor";
+import CategoryCard from "@/src/components/categorycard/CategoryCard";
+import { fetchTmdbEpisodes } from "@/src/utils/tmdb.utils";
+
+import "./AnimeInfo.css";
+
+const MetaItem = ({ label, value, isAiring = false }) => {
   if (!value) return null;
-
-  const renderValue = () => {
-    if (Array.isArray(value)) {
-      return value.map((item, index) => (
-        <span key={index}>
-          {isProducer ? (
-            <Link
-              to={`/producer/${item.replace(/[&'"^%$#@!()+=<>:;,.?/\\|{}[\]`~*_]/g, "").split(" ").join("-").replace(/-+/g, "-")}`}
-              className="cursor-pointer transition-colors duration-300 hover:text-gray-300"
-            >
-              {item}
-            </Link>
-          ) : (
-            item
-          )}
-          {index < value.length - 1 && ", "}
-        </span>
-      ));
-    }
-
-    if (isProducer) {
-      return (
-        <Link
-          to={`/producer/${value.replace(/[&'"^%$#@!()+=<>:;,.?/\\|{}[\]`~*_]/g, "").split(" ").join("-").replace(/-+/g, "-")}`}
-          className="cursor-pointer transition-colors duration-300 hover:text-gray-300"
-        >
-          {value}
-        </Link>
-      );
-    }
-
-    return value;
-  };
-
   return (
-    <div className="text-[11px] sm:text-[14px] font-medium transition-all duration-300">
-      <span className="text-gray-400">{`${label}: `}</span>
-      <span className="font-light text-white/90">{renderValue()}</span>
+    <div className="meta-group">
+      <span className="meta-label">{label}</span>
+      <span className={`meta-value ${isAiring ? 'airing' : ''}`}>{value}</span>
     </div>
   );
 };
 
-const Synopsis = ({ text, isFull, onToggle, isMobile = false }) => {
-  if (!text) return null;
-  const limit = isMobile ? 150 : 270;
-  const isTooLong = text.length > limit;
-
+const TrailerModal = ({ isOpen, onClose, trailerId }) => {
+  if (!isOpen) return null;
   return (
-    <div className={`${isMobile ? 'text-xs' : 'text-sm lg:text-base'} text-gray-300 leading-relaxed max-w-3xl`}>
-      {isTooLong ? (
-        <>
-          {isFull ? text : (isMobile ? <div className="line-clamp-3">{text}</div> : `${text.slice(0, limit)}...`)}
-          <button
-            className="ml-2 text-white/70 hover:text-white transition-colors text-xs font-medium"
-            onClick={onToggle}
-          >
-            {isFull ? "Show Less" : "Read More"}
-          </button>
-        </>
-      ) : text}
-    </div>
-  );
-};
-
-const TagsList = ({ tags }) => (
-  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-    {tags.map((tag, index) => tag.condition && (
-      <InfoTag
-        key={index}
-        icon={tag.icon}
-        text={tag.text}
-        className={tag.bgColor === "#ffffff" ? "bg-white/10" : ""}
-      />
-    ))}
-  </div>
-);
-
-const DetailGrid = ({ info, isMobile = false }) => {
-  const items = [
-    { label: "Japanese", value: info?.Japanese },
-    { label: "Synonyms", value: info?.Synonyms },
-    { label: "Aired", value: info?.Aired },
-    { label: "Premiered", value: info?.Premiered },
-    { label: "Duration", value: info?.Duration },
-    { label: "Status", value: info?.Status },
-    { label: "MAL Score", value: info?.["MAL Score"] },
-  ];
-
-  return (
-    <div className={`grid grid-cols-2 gap-2 sm:gap-3 py-3 sm:py-4 px-3 sm:px-5 backdrop-blur-md bg-white/5 rounded-lg sm:rounded-xl ${isMobile ? 'text-xs' : ''}`}>
-      {items.map((item, index) => (
-        <InfoItem key={index} label={item.label} value={item.value} isProducer={false} />
-      ))}
-
-      {info?.Genres && (
-        <div className="col-span-2 pt-2 sm:pt-3 border-t border-white/10">
-          <p className="text-gray-400 text-xs sm:text-sm mb-1.5 sm:mb-2">Genres</p>
-          <div className="flex flex-wrap gap-1 sm:gap-1.5">
-            {info.Genres.map((genre, index) => (
-              <Link
-                to={`/genre/${genre.split(" ").join("-")}`}
-                key={index}
-                className="px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs bg-white/5 rounded-md sm:rounded-lg hover:bg-white/10 transition-colors"
-              >
-                {genre}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="col-span-2 space-y-2 sm:space-y-3 pt-2 sm:pt-3 border-t border-white/10">
-        <InfoItem label="Studios" value={info?.Studios} />
-        <InfoItem label="Producers" value={info?.Producers} />
+    <div className="trailer-modal-overlay" onClick={onClose}>
+      <div className="trailer-modal-content" onClick={e => e.stopPropagation()}>
+        <button className="close-modal" onClick={onClose}>&times;</button>
+        {trailerId ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1`}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        ) : (
+          <div className="no-trailer">No trailer available for this series.</div>
+        )}
       </div>
     </div>
   );
 };
 
-function AnimeInfo({ random = false }) {
+const AnimeInfo = ({ random = false }) => {
   const { language } = useLanguage();
   const { id: paramId } = useParams();
   const id = random ? null : paramId;
-  const { id: currentId } = useParams();
   const navigate = useNavigate();
 
-  const [isFull, setIsFull] = useState(false);
   const [animeInfo, setAnimeInfo] = useState(null);
-  const [seasons, setSeasons] = useState(null);
+  const [episodesData, setEpisodesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("Episodes");
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   useEffect(() => {
-    if (id === "404-not-found-page") return;
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-    const fetchAnimeInfo = async () => {
+  useEffect(() => {
+    if (showTrailer) {
+      document.body.style.overflow = 'hidden';
+      const handleEsc = (e) => {
+        if (e.key === 'Escape') setShowTrailer(false);
+      };
+      window.addEventListener('keydown', handleEsc);
+      return () => {
+        document.body.style.overflow = 'unset';
+        window.removeEventListener('keydown', handleEsc);
+      };
+    }
+  }, [showTrailer]);
+
+  useEffect(() => {
+    const fetchInfo = async () => {
       setLoading(true);
       try {
         const data = await getAnimeInfo(id, random);
         if (!data?.data) throw new Error("Anime not found");
-        setSeasons(data?.seasons);
         setAnimeInfo(data.data);
+        
+        // Fetch TMDB episode thumbnails via anime offline database mapping
+        const tmdbData = await fetchTmdbEpisodes(data.data.ani_id, data.data.title);
+        if (tmdbData) {
+          setEpisodesData(tmdbData);
+        }
       } catch (err) {
         console.error("Error fetching anime info:", err);
         setError(err);
@@ -176,208 +114,256 @@ function AnimeInfo({ random = false }) {
         setLoading(false);
       }
     };
-    fetchAnimeInfo();
+    fetchInfo();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [id, random]);
 
-  const seoData = useMemo(() => {
-    if (!animeInfo) return null;
-    const { title, japanese_title, poster, animeInfo: info } = animeInfo;
-    const safeTitle = getSafeTitle(title, language, japanese_title);
-    return {
-      safeTitle,
-      title: optimizeTitle(`Watch ${safeTitle} Sub Dub Online Free`),
-      description: generateDescription(info?.Overview),
-      keywords: generateKeywords(animeInfo),
-      canonical: generateCanonicalUrl(`/${animeInfo.id}`),
-      ogImage: generateOGImage(poster),
-      structured: generateAnimeStructuredData(animeInfo),
-      breadcrumb: generateBreadcrumbStructuredData([
-        { name: 'Home', url: '/' },
-        { name: animeInfo.title, url: `/${animeInfo.id}` }
-      ])
-    };
+  useEffect(() => {
+    if (isMobile) {
+      setActiveTab("Overview");
+    } else if (activeTab === "Overview") {
+      setActiveTab("Episodes");
+    }
+  }, [isMobile]);
+
+  const safeTitle = useMemo(() => {
+    if (!animeInfo) return "";
+    return getSafeTitle(animeInfo.title, language, animeInfo.japanese_title);
   }, [animeInfo, language]);
 
-  const tags = useMemo(() => {
-    if (!animeInfo?.animeInfo?.tvInfo) return [];
-    const info = animeInfo.animeInfo;
-    return [
-      { condition: info.tvInfo.rating, text: info.tvInfo.rating, bgColor: "#ffffff" },
-      { condition: info.tvInfo.quality, text: info.tvInfo.quality, bgColor: "#FFBADE" },
-      { condition: info.tvInfo.sub, text: info.tvInfo.sub, icon: faClosedCaptioning, bgColor: "#B0E3AF" },
-      { condition: info.tvInfo.dub, text: info.tvInfo.dub, icon: faMicrophone, bgColor: "#B9E7FF" },
-    ];
-  }, [animeInfo]);
-
   if (loading) return <Loader type="animeInfo" />;
-  if (error || (!animeInfo && !loading)) return <Error />;
-  if (!animeInfo) {
-    navigate("/404-not-found-page");
-    return null;
-  }
+  if (error || (!animeInfo && !loading)) return <ErrorPage />;
 
-  const { poster, japanese_title, animeInfo: info } = animeInfo;
-  const isAiring = animeInfo?.animeInfo?.Status?.toLowerCase() !== "not-yet-aired";
+  const { poster, banner, description, animeInfo: info, characters, recommended_data } = animeInfo;
+
+  // Final fix for undefined season
+  const cleanSeason = info?.Premiered?.includes("undefined") ? null : info?.Premiered;
 
   return (
-    <>
+    <div className="anime-info-page">
       <Helmet>
-        <title>{seoData.title}</title>
-        <meta name="description" content={seoData.description} />
-        <meta name="keywords" content={seoData.keywords} />
-        <link rel="canonical" href={seoData.canonical} />
-        <meta property="og:title" content={seoData.title} />
-        <meta property="og:description" content={seoData.description} />
-        <meta property="og:image" content={seoData.ogImage} />
-        <meta property="og:url" content={seoData.canonical} />
-        <meta property="og:type" content="video.tv_show" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={seoData.title} />
-        <meta name="twitter:description" content={seoData.description} />
-        <meta name="twitter:image" content={seoData.ogImage} />
-        <script type="application/ld+json">{JSON.stringify(seoData.structured)}</script>
-        <script type="application/ld+json">{JSON.stringify(seoData.breadcrumb)}</script>
+        <title>{safeTitle} - JustAnime</title>
+        <meta name="description" content={description?.replace(/<[^>]*>?/gm, '').slice(0, 160)} />
       </Helmet>
 
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
-        <div className="relative w-full overflow-hidden mt-[64px] max-md:mt-[50px]">
-          <div className="relative z-10 container mx-auto py-4 sm:py-6 lg:pt-4 lg:pb-8">
+      {/* Full Page Backdrop */}
+      <div className="info-backdrop">
+        <img src={banner || poster} alt="backdrop" className="backdrop-img" />
+        <div className="backdrop-overlay"></div>
+      </div>
 
-            {/* Mobile Layout */}
-            <div className="block md:hidden pt-4">
-              <div className="flex flex-row gap-4">
-                <div className="flex-shrink-0">
-                  <div className="relative w-[130px] xs:w-[150px] aspect-[2/3] rounded-xl overflow-hidden shadow-2xl">
-                    <img src={poster} alt={seoData.safeTitle} className="w-full h-full object-cover" />
-                    {animeInfo.adultContent && (
-                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-500/90 backdrop-blur-sm rounded-md text-[10px] font-medium">18+</div>
-                    )}
-                  </div>
-                </div>
+      <div className="container mx-auto px-4 lg:px-10 relative z-10">
+        {/* Breadcrumb */}
+        <div className="breadcrumb-nav">
+          <Link to="/home" className="home-link"><FontAwesomeIcon icon={faHome} /></Link>
+          <FontAwesomeIcon icon={faChevronRight} className="breadcrumb-separator" />
+          <span className="breadcrumb-current">{safeTitle}</span>
+        </div>
 
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="space-y-0.5">
-                    <h1 className="text-lg xs:text-xl font-bold tracking-tight truncate">{seoData.safeTitle}</h1>
-                    {language === "EN" && japanese_title && (
-                      <p className="text-white/50 text-[11px] xs:text-xs truncate">JP: {japanese_title}</p>
-                    )}
-                  </div>
-                  <TagsList tags={tags} />
-                  <Synopsis text={info?.Overview} isFull={isFull} onToggle={() => setIsFull(!isFull)} isMobile />
-                </div>
+        <div className="info-content-wrapper">
+          <div className="info-main-grid">
+            
+            {/* Sidebar */}
+            <aside className="info-sidebar">
+              <div className="info-poster-container">
+                <img src={poster} alt={safeTitle} />
               </div>
 
-              <div className="mt-6">
-                {isAiring ? (
-                  <Link to={`/watch/${animeInfo.id}`} className="flex justify-center items-center w-full px-4 py-3 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-all group">
-                    <FontAwesomeIcon icon={faPlay} className="mr-2 text-xs group-hover:scale-110 transition-transform" />
-                    <span className="font-medium text-sm">Watch Now</span>
-                  </Link>
-                ) : (
-                  <div className="flex justify-center items-center w-full px-4 py-3 bg-gray-700/50 rounded-lg text-gray-400">
-                    <span className="font-medium text-sm">Not yet released</span>
+              <div className="sidebar-actions">
+                {info?.NextAiring && (
+                  <div className="airing-badge">
+                    <FontAwesomeIcon icon={faBell} />
+                    <span>Next ep airing in {Math.ceil((info.NextAiring.airingAt - Date.now()/1000) / 86400)} days</span>
                   </div>
+                )}
+                <button className="trailer-btn" onClick={() => setShowTrailer(true)}>
+                  <FontAwesomeIcon icon={faVideo} className="text-red-500" />
+                  Watch trailer
+                </button>
+              </div>
+
+              <div className="metadata-column">
+                <MetaItem label="Format" value={animeInfo.type} />
+                <MetaItem label="Status" value={animeInfo.status} isAiring={animeInfo.status === 'RELEASING' || animeInfo.status === 'AIRING'} />
+                <MetaItem label="Aired" value={info?.Aired} />
+                <MetaItem label="Season" value={cleanSeason} />
+                <MetaItem label="Average score" value={`${(animeInfo.score * 10).toFixed(0)}%`} />
+                
+                <div className="meta-group">
+                   <span className="meta-label">Studios</span>
+                   <div className="meta-tags-list">
+                      {(info?.Studios || "").split(",").map((s, i) => s.trim() && (
+                        <span key={i} className="meta-tag">{s.trim()}</span>
+                      ))}
+                   </div>
+                </div>
+
+                <div className="meta-group">
+                   <span className="meta-label">Genres</span>
+                   <div className="meta-tags-list">
+                      {info?.Genres?.map((g, i) => (
+                        <span key={i} className="meta-tag">{g}</span>
+                      ))}
+                   </div>
+                </div>
+
+                <MetaItem label="Romaji" value={animeInfo.title} />
+                <MetaItem label="Native" value={animeInfo.japanese_title} />
+              </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="info-header-content">
+              {cleanSeason && (
+                <span className="season-tag">{cleanSeason}</span>
+              )}
+              <h1 className="anime-main-title">{safeTitle}</h1>
+              
+              <div className="genres-pills">
+                {info?.Genres?.slice(0, 3).map((g, i) => (
+                  <span key={i} className="genre-pill">{g}</span>
+                ))}
+              </div>
+
+              <div className="header-action-row">
+                <Link to={`/watch/${animeInfo.id}`} className="watch-now-btn">
+                  <FontAwesomeIcon icon={faPlay} />
+                  Watch Now
+                </Link>
+                <button className="icon-btn" title="Bookmark">
+                  <FontAwesomeIcon icon={faBookmark} />
+                </button>
+                <button className="icon-btn" title="Share">
+                  <FontAwesomeIcon icon={faShareAlt} />
+                </button>
+                <a href={`https://anilist.co/anime/${animeInfo.ani_id}`} target="_blank" rel="noreferrer" className="icon-btn" title="AniList">
+                  <span className="font-black text-[10px]">AL</span>
+                </a>
+                <a href={`https://myanimelist.net/anime/${animeInfo.mal_id}`} target="_blank" rel="noreferrer" className="icon-btn" title="MyAnimeList">
+                   <span className="font-black text-[10px]">MAL</span>
+                </a>
+              </div>
+
+              <div className="synopsis-wrapper">
+                <div 
+                  className={`synopsis-text ${showFullDesc ? 'expanded' : ''}`} 
+                  dangerouslySetInnerHTML={{ __html: description || "" }}
+                ></div>
+                {description?.length > (isMobile ? 150 : 300) && (
+                  <button className="desc-toggle-btn" onClick={() => setShowFullDesc(!showFullDesc)}>
+                    {showFullDesc ? "Show Less" : "Show More"}
+                  </button>
                 )}
               </div>
 
-              <div className="mt-4">
-                <DetailGrid info={info} isMobile />
-              </div>
-            </div>
-
-            {/* Desktop Layout */}
-            <div className="hidden md:block">
-              <div className="flex flex-row gap-6 lg:gap-10">
-                <div className="flex-shrink-0">
-                  <div className="relative w-[220px] lg:w-[260px] aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
-                    <img src={poster} alt={seoData.safeTitle} className="w-full h-full object-cover" />
-                    {animeInfo.adultContent && (
-                      <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-red-500/90 backdrop-blur-sm rounded-lg text-xs font-medium">18+</div>
-                    )}
-                  </div>
+              {/* Tabs Section */}
+              <div className="info-tabs-container">
+                <div className="tabs-header">
+                  {(isMobile ? ["Overview", "Episodes", "Characters", "Related", "More like this"] : ["Episodes", "Characters", "Related", "More like this"]).map(tab => (
+                    <div 
+                      key={tab} 
+                      className={`tab-item ${activeTab === tab ? 'active' : ''}`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab}
+                    </div>
+                  ))}
                 </div>
 
-                <div className="flex-1 space-y-4 lg:space-y-5 min-w-0">
-                  <div className="space-y-1">
-                    <h1 className="text-3xl lg:text-4xl font-bold tracking-tight truncate">{seoData.safeTitle}</h1>
-                    {language === "EN" && japanese_title && (
-                      <p className="text-white/50 text-sm lg:text-base truncate">JP Title: {japanese_title}</p>
-                    )}
-                  </div>
-
-                  <TagsList tags={tags} />
-                  <Synopsis text={info?.Overview} isFull={isFull} onToggle={() => setIsFull(!isFull)} />
-
-                  {isAiring ? (
-                    <Link to={`/watch/${animeInfo.id}`} className="inline-flex items-center px-6 py-3 bg-white/10 backdrop-blur-md rounded-xl text-white hover:bg-white/20 hover:scale-[1.02] transition-all group">
-                      <FontAwesomeIcon icon={faPlay} className="mr-2 text-sm group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">Watch Now</span>
-                    </Link>
-                  ) : (
-                    <div className="inline-flex items-center px-6 py-3 bg-gray-700/50 rounded-xl text-gray-400">
-                      <span className="font-medium">Not yet released</span>
+                <div className="tab-content">
+                  {activeTab === "Overview" && isMobile && (
+                    <div className="overview-tab-view">
+                       <div className="mobile-metadata metadata-column">
+                          <MetaItem label="Format" value={animeInfo.type} />
+                          <MetaItem label="Status" value={animeInfo.status} isAiring={animeInfo.status === 'RELEASING' || animeInfo.status === 'AIRING'} />
+                          <MetaItem label="Aired" value={info?.Aired} />
+                          <MetaItem label="Season" value={cleanSeason} />
+                          <MetaItem label="Average score" value={`${(animeInfo.score * 10).toFixed(0)}%`} />
+                          <MetaItem label="Studios" value={info?.Studios} />
+                          <MetaItem label="Source" value={info?.Source} />
+                          <MetaItem label="Native Title" value={animeInfo.japanese_title} />
+                       </div>
                     </div>
                   )}
 
-                  <DetailGrid info={info} />
+                  {activeTab === "Episodes" && (
+                    <div className="episodes-tab-view">
+                      <div className="episodes-top-row">
+                        <div className="episode-count-pill">{animeInfo.sub_episodes || "?"} Episodes</div>
+                        <div className="ep-grid-controls">
+                           <div className="control-btn"><FontAwesomeIcon icon={faImage} /></div>
+                           <div className="control-btn"><FontAwesomeIcon icon={faSortAmountDown} /></div>
+                        </div>
+                      </div>
+
+                      <div className="ep-thumbnail-grid">
+                        {(Array.isArray(episodesData) && episodesData.length > 0 
+                          ? episodesData 
+                          : Array.from({ length: Number(animeInfo?.sub_episodes) || 0 })
+                        ).map((ep, i) => {
+                          const epNum = ep?.number || i + 1;
+                          const epTitle = ep?.title || `Episode ${epNum}`;
+                          const epThumb = ep?.thumbnail || banner || poster;
+                          
+                          return (
+                            <Link to={`/watch/${animeInfo.id}?ep=${epNum}`} key={i} className="ep-card group">
+                              <div className="ep-thumb-wrapper">
+                                <img src={epThumb} alt={epTitle} className="transition-transform duration-500 group-hover:scale-110" />
+                                <div className="ep-badge">Ep {epNum}</div>
+                                <div className="ep-views">
+                                  <FontAwesomeIcon icon={faEye} className="text-[9px]" />
+                                  {(Math.random() * 50 + 1).toFixed(1)}K
+                                </div>
+                              </div>
+                              <h5 className="ep-title group-hover:text-white transition-colors" title={epTitle}>
+                                 {epTitle}
+                              </h5>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "Characters" && (
+                    <Voiceactor animeInfo={animeInfo} />
+                  )}
+
+                  {activeTab === "Related" && (
+                     <CategoryCard
+                       label="Related Anime"
+                       data={animeInfo.related_data}
+                       limit={animeInfo.related_data?.length}
+                       showViewMore={false}
+                       gridClass="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                     />
+                  )}
+
+                  {activeTab === "More like this" && (
+                    <CategoryCard
+                      label="Recommended for you"
+                      data={recommended_data}
+                      limit={recommended_data?.length}
+                      showViewMore={false}
+                      gridClass="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                    />
+                  )}
                 </div>
               </div>
-            </div>
+            </main>
+
           </div>
         </div>
-
-        {/* Sections */}
-        <div className="container mx-auto space-y-8 pb-12">
-          {seasons?.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 px-1">More Seasons</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {seasons.map((season, index) => (
-                  <Link
-                    to={`/${season.id}`}
-                    key={index}
-                    className={`relative w-full aspect-[3/1] rounded-lg overflow-hidden group border-2 transition-all ${currentId === String(season.id) ? "border-white/40 shadow-lg" : "border-transparent"}`}
-                  >
-                    <img src={season.season_poster} alt={season.season} className={`w-full h-full object-cover scale-150 transition-opacity ${currentId === String(season.id) ? "opacity-50" : "opacity-40 group-hover:opacity-60"}`} />
-                    <div
-                      className="absolute inset-0 z-10"
-                      style={{
-                        backgroundImage: `url('data:image/svg+xml,<svg width="3" height="3" viewBox="0 0 3 3" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="1.5" cy="1.5" r="0.5" fill="white" fill-opacity="0.25"/></svg>')`,
-                        backgroundSize: '3px 3px'
-                      }}
-                    />
-                    <div className="absolute inset-0 z-20 bg-gradient-to-r from-black/60 to-transparent" />
-                    <div className="absolute inset-0 z-30 flex items-center justify-center">
-                      <p className="text-sm sm:text-base font-bold text-center px-4">{season.season}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {animeInfo?.charactersVoiceActors?.length > 0 && (
-            <div className="pt-4">
-              <Voiceactor animeInfo={animeInfo} />
-            </div>
-          )}
-
-          {animeInfo?.recommended_data?.length > 0 && (
-            <div className="pt-4">
-              <CategoryCard
-                label="Recommended for you"
-                data={animeInfo.recommended_data}
-                limit={animeInfo.recommended_data.length}
-                showViewMore={false}
-                gridClass="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-              />
-            </div>
-          )}
-        </div>
       </div>
-    </>
+
+      <TrailerModal 
+        isOpen={showTrailer} 
+        onClose={() => setShowTrailer(false)} 
+        trailerId={animeInfo.trailer} 
+      />
+    </div>
   );
-}
+};
+
 
 export default AnimeInfo;

@@ -1,0 +1,111 @@
+.upcoming-slider-container {
+  width: 100%;
+  position: relative;
+  user-select: none;
+}
+
+.upcoming-swiper {
+  overflow: visible !important;
+  padding-bottom: 60px;
+}
+
+.upcoming-slide {
+  height: auto;
+}
+
+.upcoming-card {
+  transition: z-index 0.3s step-end;
+}
+
+.upcoming-card:hover {
+  z-index: 100;
+}
+
+.upcoming-poster-wrapper {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.upcoming-card:hover .upcoming-poster-wrapper {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.upcoming-preview-card {
+  transform-origin: center;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 1);
+  z-index: 1000;
+}
+
+/* Ensure preview cards don't get cut off on the edges */
+.upcoming-slide:first-child .upcoming-preview-card,
+.upcoming-slide:nth-child(2) .upcoming-preview-card {
+  left: 0;
+}
+
+.upcoming-slide:last-child .upcoming-preview-card,
+.upcoming-slide:nth-last-child(2) .upcoming-preview-card {
+  left: auto;
+  right: 0;
+}
+
+.upcoming-preview-video {
+  background: #000;
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.upcoming-preview-video iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180%;
+  height: 180%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border: none;
+}
+
+.upcoming-swiper .swiper-button-next,
+.upcoming-swiper .swiper-button-prev {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(15px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: white;
+  transition: all 0.3s ease;
+  top: 35% !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.upcoming-swiper .swiper-button-next:after,
+.upcoming-swiper .swiper-button-prev:after {
+  font-size: 18px !important;
+  font-weight: 800;
+}
+
+.upcoming-swiper .swiper-button-next:hover,
+.upcoming-swiper .swiper-button-prev:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  .upcoming-preview-card {
+    width: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .upcoming-preview-card {
+    display: none;
+  }
+}

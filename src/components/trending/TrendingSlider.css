@@ -1,0 +1,125 @@
+.trending-slider-container {
+  width: 100%;
+  user-select: none;
+}
+
+.trending-swiper {
+  overflow: visible !important;
+  padding-bottom: 50px;
+}
+
+.trending-slide {
+  height: auto;
+}
+
+.anime-card {
+  transition: z-index 0.3s step-end;
+}
+
+.anime-card:hover {
+  z-index: 100;
+}
+
+.poster-wrapper {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.anime-card:hover .poster-wrapper {
+  opacity: 1; /* Keep poster visible but card will pop over */
+}
+
+.preview-card {
+  transform-origin: center;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 1);
+  pointer-events: auto;
+}
+
+/* Ensure preview cards don't get cut off on the edges */
+.trending-slide:first-child .preview-card {
+  left: 0;
+}
+
+.trending-slide:nth-child(-n+2) .preview-card {
+  left: 0;
+}
+
+.trending-slide:last-child .preview-card {
+  left: auto;
+  right: 0;
+}
+
+.trending-slide:nth-last-child(-n+2) .preview-card {
+  left: auto;
+  right: 0;
+}
+
+.preview-video {
+  background: #000;
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.preview-video iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border: none;
+}
+
+.interaction-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Swiper Navigation Customization */
+.trending-swiper .swiper-button-next,
+.trending-swiper .swiper-button-prev {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(15px);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: white;
+  transition: all 0.3s ease;
+  top: 40% !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 50;
+}
+
+.trending-swiper .swiper-button-next:after,
+.trending-swiper .swiper-button-prev:after {
+  font-size: 20px !important;
+  font-weight: 800;
+}
+
+.trending-swiper .swiper-button-next:hover,
+.trending-swiper .swiper-button-prev:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.trending-swiper .swiper-button-disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .preview-card {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .preview-card {
+    display: none;
+  }
+}

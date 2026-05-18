@@ -30,11 +30,16 @@ const Schedule = () => {
     const monthsArr = [];
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
+      const yearStr = date.getFullYear();
+      const monthStr = String(date.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(date.getDate()).padStart(2, '0');
+      const localFullDate = `${yearStr}-${monthStr}-${dayStr}`;
+
       monthsArr.push({
         day,
         monthName: date.toLocaleString("default", { month: "short" }),
         dayname: date.toLocaleString("default", { weekday: "short" }),
-        fulldate: date.toISOString().split('T')[0]
+        fulldate: localFullDate
       });
     }
     setDates(monthsArr);
@@ -58,14 +63,15 @@ const Schedule = () => {
       setLoading(true);
 
       // Check if cached data exists
-      const cachedData = localStorage.getItem(`schedule-${date}`);
+      const cacheVersion = "v2";
+      const cachedData = localStorage.getItem(`schedule-${date}-${cacheVersion}`);
       if (cachedData) {
         const parsedData = JSON.parse(cachedData);
         setscheduleData(Array.isArray(parsedData) ? parsedData : []);
       } else {
         const data = await getSchedInfo(date);
         setscheduleData(Array.isArray(data) ? data : []);
-        localStorage.setItem(`schedule-${date}`, JSON.stringify(data || []));
+        localStorage.setItem(`schedule-${date}-${cacheVersion}`, JSON.stringify(data || []));
       }
     } catch (err) {
       console.error("Error fetching schedule info:", err);

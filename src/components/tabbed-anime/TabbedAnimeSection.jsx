@@ -2,54 +2,37 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import CategoryCard from "@/src/components/categorycard/CategoryCard.jsx";
 import { Link } from "react-router-dom";
-import { FaChevronRight } from "react-icons/fa";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
-function TabbedAnimeSection({ topAiring, mostFavorite, latestCompleted, className = "", limit = 10 }) {
-  const [activeTab, setActiveTab] = useState("airing");
+function TabbedAnimeSection({ topAiring, mostFavorite, latestCompleted, className = "", limit = 24 }) {
+  const [activeTab, setActiveTab] = useState("season");
 
   const tabs = [
-    { id: "airing", label: "Top Airing", data: topAiring, path: "top-airing" },
-    { id: "favorite", label: "Most Favorite", data: mostFavorite, path: "most-favorite" },
-    { id: "completed", label: "Latest Completed", data: latestCompleted, path: "completed" },
+    { id: "season", label: "This Season", data: topAiring, path: "top-airing" },
+    { id: "popular", label: "All Time Popular", data: mostFavorite, path: "most-favorite" },
+    { id: "top", label: "Top Rated", data: latestCompleted, path: "completed" },
   ];
 
   const activeTabData = tabs.find((tab) => tab.id === activeTab);
 
   return (
-    <div className={`w-full ${className}`}>
-      <div className="flex justify-between items-center border-b border-[#ffffff1a] relative">
-        <div className="flex">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative px-6 py-4 text-[15px] font-medium transition-all duration-300 
-                ${activeTab === tab.id
-                  ? "text-white after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded-t-full"
-                  : "text-[#ffffff80] hover:text-white"
-                }
-                before:absolute before:bottom-0 before:left-1/2 before:w-0 before:h-[2px] before:bg-[#ffffff40]
-                before:transition-all before:duration-300 before:-translate-x-1/2
-                hover:before:w-full
-                group
-              `}
-            >
-              <span className="relative z-10 transition-transform duration-300 group-hover:transform group-hover:translate-y-[-1px]">
-                {tab.label}
-              </span>
-            </button>
-          ))}
-        </div>
-        <Link
-          to={`/${activeTabData.path}`}
-          className="flex items-center gap-x-1 py-1 px-2 -mr-2 rounded-md
-            text-[13px] font-medium text-[#ffffff80] hover:text-white
-            transition-all duration-300 group"
-        >
-          View all
-          <FaChevronRight className="text-[10px] transform transition-transform duration-300 
-            group-hover:translate-x-0.5" />
-        </Link>
+    <div className={`w-full ${className} mt-12`}>
+      <div className="flex flex-wrap items-center gap-3 mb-8">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all duration-300 
+              ${activeTab === tab.id
+                ? "bg-white text-black shadow-[0_4px_15px_rgba(255,255,255,0.2)]"
+                : "bg-[#2a2a2a] text-white/50 hover:text-white hover:bg-[#333]"
+              }
+            `}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <CategoryCard
@@ -57,8 +40,18 @@ function TabbedAnimeSection({ topAiring, mostFavorite, latestCompleted, classNam
         path={activeTabData.path}
         limit={limit}
         showViewMore={false}
-        cardStyle="grid-cols-5 max-[1400px]:grid-cols-4 max-[758px]:grid-cols-3 max-[478px]:grid-cols-3"
+        variant="cinematic"
+        cardStyle="grid-cols-6 max-[1400px]:grid-cols-4 max-[1024px]:grid-cols-3 max-[758px]:grid-cols-2 max-[478px]:grid-cols-2"
       />
+
+      <div className="flex justify-center mt-10">
+        <Link 
+          to={`/${activeTabData.path}`}
+          className="w-full max-w-[600px] h-12 bg-[#1a1a1a] hover:bg-[#252525] border border-white/5 text-white/70 hover:text-white transition-all rounded-xl flex items-center justify-center font-bold text-sm"
+        >
+          View more
+        </Link>
+      </div>
     </div>
   );
 }
@@ -70,4 +63,4 @@ TabbedAnimeSection.propTypes = {
   className: PropTypes.string,
 };
 
-export default TabbedAnimeSection; 
+export default TabbedAnimeSection;

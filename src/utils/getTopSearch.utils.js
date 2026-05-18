@@ -1,31 +1,47 @@
-import axios from "axios";
+import { fetchAniListHome } from "./anilist.utils";
 
 const getTopSearch = async () => {
   try {
-    let workerUrls = import.meta.env.VITE_WORKER_URL?.split(",");
-    let baseUrl = workerUrls?.length
-      ? workerUrls[Math.floor(Math.random() * workerUrls.length)]
-      : import.meta.env.VITE_API_URL;
-    const storedData = localStorage.getItem("topSearch");
+    const storedData = localStorage.getItem("topSearch_anilist_v2");
     if (storedData) {
       const { data, timestamp } = JSON.parse(storedData);
-      if (Date.now() - timestamp <= 7 * 24 * 60 * 60 * 1000) {
+      if (Date.now() - timestamp <= 24 * 60 * 60 * 1000) {
         return data;
       }
     }
-    const { data } = await axios.get(`${baseUrl}/top-search`);
-    const results = data?.results || [];
+
+    const alData = await fetchAniListHome();
+    if (!alData || !alData.popular) return [];
+    const results = (alData.popular.media || []).map((item) => ({
+      id: item.id,
+      title: item.title.userPreferred || item.title.romaji || item.title.english,
+      poster: item.coverImage.large,
+      type: item.format,
+      episodes: {
+        sub: item.episodes || 0,
+        dub: 0
+      },
+      status: item.status,
+      score: item.averageScore / 10,
+      tvInfo: {
+        sub: item.episodes || "?",
+        dub: "?",
+        quality: "HD",
+        showType: item.format
+      }
+    }));
+
     if (results.length) {
       localStorage.setItem(
-        "topSearch",
+        "topSearch_anilist_v2",
         JSON.stringify({ data: results, timestamp: Date.now() })
       );
       return results;
     }
     return [];
   } catch (error) {
-    console.error("Error fetching top search data:", error);
-    return null;
+    console.error("Error fetching top search data from AniList:", error);
+    return [];
   }
 };
 

@@ -27,11 +27,20 @@ function WebSearch() {
     };
 
     return (
-        <div className="flex items-center relative w-[450px] max-[600px]:w-fit">
+        <div className="flex items-center relative w-[350px] max-[600px]:w-fit">
+            <button
+                className="absolute left-4 text-white/40 hover:text-white transition-colors max-[600px]:static max-[600px]:bg-transparent focus:outline-none max-[600px]:p-0 z-10"
+                onClick={handleSearchClick}
+            >
+                <FontAwesomeIcon
+                    icon={faMagnifyingGlass}
+                    className="text-[13px]"
+                />
+            </button>
             <input
                 type="text"
-                className="w-full px-5 py-2 bg-[#2a2a2a]/75 text-white rounded-lg focus:outline-none transition-colors placeholder-white/50 max-[600px]:hidden"
-                placeholder="Search anime..."
+                className="w-full pl-11 pr-5 py-2 bg-[#1a1a1a] text-white rounded-full focus:outline-none focus:bg-[#222] transition-all placeholder-white/30 text-xs border border-white/5"
+                placeholder="Search..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onFocus={() => setIsFocused(true)}
@@ -53,15 +62,6 @@ function WebSearch() {
                     }
                 }}
             />
-            <button
-                className="absolute right-4 text-white/50 hover:text-white transition-colors max-[600px]:static max-[600px]:bg-transparent focus:outline-none max-[600px]:p-0"
-                onClick={handleSearchClick}
-            >
-                <FontAwesomeIcon
-                    icon={faMagnifyingGlass}
-                    className="text-lg max-[600px]:text-white max-[600px]:text-2xl max-[575px]:text-xl max-[600px]:mt-[7px]"
-                />
-            </button>
             {searchValue.trim() && isFocused && (
                 <div
                     ref={addSuggestionRef}

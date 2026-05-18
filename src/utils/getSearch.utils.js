@@ -1,16 +1,33 @@
-import axios from "axios";
+import { fetchAniListSearch } from "./anilist.utils";
 
-const getSearch = async (keyword, page) => {
-  const api_url = import.meta.env.VITE_API_URL;
-  if (!page) page = 1;
+const getSearch = async (keyword, page = 1) => {
   try {
-    const response = await axios.get(
-      `${api_url}/search?keyword=${keyword}&page=${page}`
-    );
-    return response.data.results;
+    const alData = await fetchAniListSearch(keyword, page);
+    
+    return (alData.Page.media || []).map((item) => ({
+      id: item.id,
+      slug: item.id.toString(),
+      ani_id: item.id,
+      title: item.title.userPreferred || item.title.romaji || item.title.english,
+      poster: item.coverImage.large,
+      banner: item.bannerImage,
+      type: item.format,
+      episodes: {
+        sub: item.episodes || 0,
+        dub: 0
+      },
+      status: item.status,
+      score: item.averageScore / 10,
+      tvInfo: {
+        sub: item.episodes || "?",
+        dub: "?",
+        quality: "HD",
+        showType: item.format
+      }
+    }));
   } catch (err) {
-    console.error("Error fetching genre info:", err);
-    return err;
+    console.error("Error fetching search results from AniList:", err);
+    return [];
   }
 };
 

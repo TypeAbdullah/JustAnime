@@ -1,13 +1,18 @@
-import axios from "axios";
+import { fetchAniListInfo } from "./anilist.utils";
 
 const getNextEpisodeSchedule = async (id) => {
-  const api_url = import.meta.env.VITE_API_URL;
   try {
-    const response = await axios.get(`${api_url}/schedule/${id}`);
-    return response.data.results;
+    const alData = await fetchAniListInfo(id);
+    if (alData?.Media?.nextAiringEpisode) {
+      return {
+        nextEpisodeSchedule: alData.Media.nextAiringEpisode.airingAt * 1000,
+        episode: alData.Media.nextAiringEpisode.episode
+      };
+    }
+    return null;
   } catch (err) {
-    console.error("Error fetching next episode schedule:", err);
-    return err;
+    console.error("Error fetching next episode schedule from AniList:", err);
+    return null;
   }
 };
 

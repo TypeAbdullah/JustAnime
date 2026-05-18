@@ -1,15 +1,22 @@
-import axios from "axios";
+import { fetchAniListSearch } from "./anilist.utils";
 
 const getSearchSuggestion = async (keyword) => {
-  const api_url = import.meta.env.VITE_API_URL;
   try {
-    const response = await axios.get(
-      `${api_url}/search/suggest?keyword=${keyword}`
-    );
-    return response.data.results;
+    const alData = await fetchAniListSearch(keyword, 1);
+    const results = (alData.Page.media || []).slice(0, 5).map((item) => ({
+      id: item.id,
+      slug: item.id.toString(),
+      ani_id: item.id,
+      title: item.title.userPreferred || item.title.romaji || item.title.english,
+      poster: item.coverImage.large,
+      type: item.format,
+      status: item.status,
+      score: item.averageScore / 10
+    }));
+    return results;
   } catch (err) {
-    console.error("Error fetching genre info:", err);
-    return err;
+    console.error("Error fetching search suggestions from AniList:", err);
+    return [];
   }
 };
 

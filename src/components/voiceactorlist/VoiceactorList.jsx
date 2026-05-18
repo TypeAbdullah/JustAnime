@@ -88,74 +88,69 @@ function VoiceactorList({ id, isOpen, onClose }) {
             {loading ? (
               <VoiceActorlistLoader />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                {VoiceactorList.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 sm:p-3 bg-zinc-800/50 hover:bg-zinc-800/70 rounded-lg border border-zinc-700/30 transition-all duration-300"
-                  >
-                    {/* Character Section */}
-                    <div className="flex items-center gap-2 sm:gap-3 w-[48%]">
-                      <img
-                        src={item.character.poster}
-                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-zinc-700 hover:border-zinc-500 transition-all duration-300"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src = "https://i.postimg.cc/HnHKvHpz/no-avatar.jpg";
-                        }}
-                      />
-                      <div className="min-w-0">
-                        {item.character.name && (
-                          <h3 className="text-xs sm:text-sm text-zinc-100 font-medium truncate">
-                            {item.character.name}
-                          </h3>
-                        )}
-                        {item.character.cast && (
-                          <p className="text-[10px] sm:text-xs text-zinc-400 truncate">
-                            {item.character.cast}
-                          </p>
-                        )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {VoiceactorList?.map((item, index) => {
+                  if (!item.character) return null;
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-stretch bg-[#141414] rounded-lg overflow-hidden border border-white/5 transition-all duration-300 shadow-md group"
+                    >
+                      {/* Character Image */}
+                      <div className="w-[60px] h-[85px] flex-shrink-0 bg-zinc-900">
+                        <img
+                          src={item.character.poster}
+                          alt={item.character.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(e) => { e.target.src = "https://i.postimg.cc/HnHKvHpz/no-avatar.jpg"; }}
+                        />
                       </div>
-                    </div>
 
-                    {/* Voice Actors Section */}
-                    {item.voiceActors && item.voiceActors.length > 0 && (
-                      <div className="flex items-center justify-end gap-2 sm:gap-3 w-[48%]">
-                        {item.voiceActors.length > 1 ? (
-                          <div className="flex items-center justify-end gap-1 sm:gap-2 w-full overflow-x-auto py-1 sm:py-2">
-                            {item.voiceActors.map((actor, idx) => (
-                              <img
-                                key={idx}
-                                src={actor.poster}
-                                className="w-7 h-7 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0 opacity-60 hover:opacity-100 border-2 border-zinc-700 hover:border-zinc-500 transition-all duration-300"
-                                title={actor.name}
-                                onError={(e) => {
-                                  e.target.src = "https://i.postimg.cc/HnHKvHpz/no-avatar.jpg";
-                                }}
-                              />
-                            ))}
+                      {/* Content Section */}
+                      <div className="flex-1 flex justify-between p-2.5 min-w-0">
+                        {/* Character Info */}
+                        <div className="flex flex-col justify-between min-w-0 pr-2">
+                          <div className="flex flex-col">
+                            <h4 className="text-[12px] font-bold text-white truncate" title={item.character.name}>
+                              {item.character.name}
+                            </h4>
+                            <span className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-tighter">
+                              {item.character.cast || "SUPPORTING"}
+                            </span>
                           </div>
-                        ) : (
-                          <>
-                            <div className="text-right min-w-0">
-                              <p className="text-xs sm:text-sm text-zinc-300 truncate">
+                        </div>
+
+                        {/* Voice Actor Info */}
+                        {item.voiceActors?.length > 0 && item.voiceActors[0] && (
+                          <div className="flex flex-col justify-between items-end min-w-0 pl-2">
+                            <div className="flex flex-col items-end">
+                              <h4 className="text-[12px] font-bold text-zinc-300 truncate w-full text-right" title={item.voiceActors[0].name}>
                                 {item.voiceActors[0].name}
-                              </p>
+                              </h4>
+                              <span className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-tighter">
+                                Japanese
+                              </span>
                             </div>
-                            <img
-                              src={item.voiceActors[0].poster}
-                              className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0 opacity-60 hover:opacity-100 border-2 border-zinc-700 hover:border-zinc-500 transition-all duration-300"
-                              title={item.voiceActors[0].name}
-                              onError={(e) => {
-                                e.target.src = "https://i.postimg.cc/HnHKvHpz/no-avatar.jpg";
-                              }}
-                            />
-                          </>
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {/* Voice Actor Image */}
+                      {item.voiceActors?.length > 0 && item.voiceActors[0] && (
+                        <div className="w-[60px] h-[85px] flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity bg-zinc-900">
+                          <img
+                            src={item.voiceActors[0].poster}
+                            alt={item.voiceActors[0].name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => { e.target.src = "https://i.postimg.cc/HnHKvHpz/no-avatar.jpg"; }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

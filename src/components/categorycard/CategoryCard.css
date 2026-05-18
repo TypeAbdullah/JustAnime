@@ -136,3 +136,28 @@
   font-size: 13px;
   font-weight: 500;
 }
+
+@keyframes preview-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-preview-pop {
+  animation: preview-pop 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center;
+}
+
+.anime-card-container {
+  z-index: 1;
+  transition: z-index 0.3s step-end;
+}
+
+.anime-card-container:hover {
+  z-index: 1000;
+}

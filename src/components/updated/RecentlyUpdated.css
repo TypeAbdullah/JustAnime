@@ -1,0 +1,230 @@
+.recently-updated-container {
+  width: 100%;
+  position: relative;
+}
+
+.updated-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px 16px;
+  width: 100%;
+}
+
+.updated-card {
+  width: 100%;
+  min-width: 0; /* Prevents grid items from growing beyond their allotted space */
+}
+
+.updated-thumbnail-wrapper {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* Fixed 16:9 Aspect Ratio */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.updated-card:hover .updated-thumbnail-wrapper {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.updated-thumbnail-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.updated-card:hover .updated-thumbnail-img {
+  transform: none;
+}
+
+.updated-thumbnail-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
+}
+
+.updated-card:hover .updated-thumbnail-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.updated-episode-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: white;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 5;
+}
+
+.updated-play-button {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.updated-card:hover .updated-play-button {
+  opacity: 1;
+}
+
+.updated-play-icon {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  font-size: 12px;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.updated-card:hover .updated-play-icon {
+  transform: scale(1);
+}
+
+.updated-info {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 4px;
+}
+
+.updated-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #2a2a2a;
+}
+
+.updated-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.updated-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.updated-ep-title {
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.updated-anime-title {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.updated-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.updated-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.updated-view-all {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.3s ease;
+}
+
+.updated-view-all:hover {
+  color: white;
+}
+
+.updated-view-all svg {
+  font-size: 10px;
+  transition: transform 0.3s ease;
+}
+
+.updated-view-all:hover svg {
+  transform: translateX(2px);
+}
+
+/* Responsive Grid */
+@media (max-width: 1400px) {
+  .updated-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .updated-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .updated-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  .updated-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .updated-info {
+    gap: 8px;
+  }
+  .updated-ep-title {
+    font-size: 12px;
+  }
+  .updated-anime-title {
+    font-size: 10px;
+  }
+}
