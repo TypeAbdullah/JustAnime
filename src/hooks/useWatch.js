@@ -349,6 +349,8 @@ export const useWatch = (animeId, initialEpisodeId) => {
         }
 
         // Priority 2: TMDB for Thumbnails (and fallback titles)
+        let newAired = ep.aired;
+        let airedChanged = false;
         if (tmdbMetadata) {
           const match = tmdbMetadata.find(t => t.number === ep.episode_no);
           if (match) {
@@ -360,12 +362,16 @@ export const useWatch = (animeId, initialEpisodeId) => {
               newTitle = match.title;
               titleChanged = true;
             }
+            if (match.aired && newAired !== match.aired) {
+              newAired = match.aired;
+              airedChanged = true;
+            }
           }
         }
 
-        if (titleChanged || thumbChanged) {
+        if (titleChanged || thumbChanged || airedChanged) {
           changed = true;
-          return { ...ep, title: newTitle, thumbnail: newThumbnail };
+          return { ...ep, title: newTitle, thumbnail: newThumbnail, aired: newAired };
         }
         return ep;
       });

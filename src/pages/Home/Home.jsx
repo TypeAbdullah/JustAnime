@@ -43,12 +43,12 @@ function Home() {
       <Helmet>
         <title>{website_name} | Free Anime Streaming Platform</title>
         <meta name="description" content={`${website_name} is the best site to watch anime online for free. Stream thousands of English subbed and dubbed anime episodes in HD quality with no ads.`} />
-        <meta name="keywords" content="justanime, watch anime free, anime online sub dub, free anime streaming, no ads anime, best anime site" />
-        <link rel="canonical" href="https://justanime.fun" />
+        <meta name="keywords" content="kitsura, watch anime free, anime online sub dub, free anime streaming, no ads anime, best anime site" />
+        <link rel="canonical" href="https://kitsura.fun" />
 
         <meta property="og:title" content={`${website_name} | Free Anime Streaming Platform`} />
         <meta property="og:description" content={`Watch high-quality anime online for free on ${website_name}. No ads, daily updates, and a massive library of subbed and dubbed content.`} />
-        <meta property="og:url" content="https://justanime.fun" />
+        <meta property="og:url" content="https://kitsura.fun" />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:card" content="summary_large_image" />

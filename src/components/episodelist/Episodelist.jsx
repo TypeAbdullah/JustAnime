@@ -95,9 +95,9 @@ function Episodelist({
                     </h1>
                     <div className="mt-1 flex flex-col gap-0.5">
                        <div className="flex items-center gap-1.5 text-[12px] text-[#aaaaaa]">
-                          <span>13K views</span>
+                          <span>{(10 + (index % 7) * 3)}K views</span>
                           <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                          <span>1 month ago</span>
+                          <span>{item?.aired ? new Date(item.aired).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Recently"}</span>
                        </div>
                        {item?.filler && (
                          <span className="text-[10px] uppercase tracking-wider text-orange-500 font-bold">Filler</span>

@@ -142,7 +142,7 @@ const AnimeInfo = ({ random = false }) => {
   return (
     <div className="anime-info-page">
       <Helmet>
-        <title>{safeTitle} - JustAnime</title>
+        <title>{safeTitle} - Kitsura</title>
         <meta name="description" content={description?.replace(/<[^>]*>?/gm, '').slice(0, 160)} />
       </Helmet>
 

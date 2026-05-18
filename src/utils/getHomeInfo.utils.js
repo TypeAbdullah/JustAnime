@@ -51,6 +51,7 @@ export default async function getHomeInfo() {
       .map(sched => ({
         ...mapMedia(sched.media),
         episode_no: sched.episode,
+        airingAt: sched.airingAt,
         tvInfo: {
           sub: sched.episode,
           dub: "?",

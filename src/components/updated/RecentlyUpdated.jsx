@@ -21,6 +21,26 @@ const UpdatedCard = ({ item, language }) => {
     loadThumb();
     return () => { cancelled = true; };
   }, [item.id, item.ani_id, item.episode_no]);
+
+  const getRelativeTime = (timestamp) => {
+    if (!timestamp) return `${Math.floor(Math.random() * 20 + 1)} hours ago`;
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+    if (diff < 0) return "Just now";
+    
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
   
   return (
     <div className="updated-card group">
@@ -63,7 +83,7 @@ const UpdatedCard = ({ item, language }) => {
             </span>
             <span className="updated-stat-item">
               <FontAwesomeIcon icon={faClock} />
-              {Math.floor(Math.random() * 20 + 1)} hours ago
+              {getRelativeTime(item.airingAt)}
             </span>
           </div>
         </div>

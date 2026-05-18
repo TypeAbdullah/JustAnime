@@ -47,6 +47,7 @@ export const ANILIST_QUERIES = {
       latest: Page(page: $page, perPage: 50) {
         airingSchedules(airingAt_lesser: $airingAt_lesser, sort: TIME_DESC) {
           episode
+          airingAt
           media {
             ...mediaFields
           }

@@ -44,7 +44,7 @@ export const generateKeywords = (animeInfo) => {
 };
 
 export const generateCanonicalUrl = (path) => {
-  const baseUrl = 'https://justanime.fun';
+  const baseUrl = 'https://kitsura.fun';
   if (!path) return baseUrl;
 
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
@@ -55,7 +55,7 @@ export const generateOGImage = (imageUrl, fallbackUrl = 'https://i.postimg.cc/kM
   if (!imageUrl) return fallbackUrl;
 
   if (imageUrl.startsWith('/')) {
-    return `https://justanime.fun${imageUrl}`;
+    return `https://kitsura.fun${imageUrl}`;
   }
 
   return imageUrl;
@@ -121,14 +121,14 @@ export const generateWebsiteStructuredData = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": website_name,
-    "alternateName": ["justanime.fun", "Just Anime"],
-    "url": "https://justanime.fun",
+    "alternateName": ["kitsura.fun", "Kitsura"],
+    "url": "https://kitsura.fun",
     "description": `${website_name} is a free anime streaming website where you can watch English Subbed and Dubbed Anime online.`,
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://justanime.fun/search?keyword={search_term_string}"
+        "urlTemplate": "https://kitsura.fun/search?keyword={search_term_string}"
       },
       "query-input": "required name=search_term_string"
     }
@@ -159,13 +159,13 @@ export const generateOrganizationStructuredData = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": website_name,
-    "url": "https://justanime.fun",
-    "logo": "https://justanime.fun/logo.png",
+    "url": "https://kitsura.fun",
+    "logo": "https://kitsura.fun/logo.png",
     "sameAs": [
     ],
     "contactPoint": {
       "@type": "ContactPoint",
-      "email": "justanimexyz@gmail.com",
+      "email": "kitsuraxyz@gmail.com",
       "contactType": "customer service"
     }
   };
